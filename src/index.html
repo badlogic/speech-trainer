@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Sound Practice - Fun Learning for Kids!</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body class="min-h-screen bg-gradient-to-b from-sky-100 to-emerald-100">
+    <!-- Header -->
+    <header class="bg-white shadow-lg rounded-b-3xl">
+        <div class="max-w-4xl mx-auto px-6 py-6">
+            <h1 class="text-4xl font-bold text-center flex items-center justify-center gap-3">
+                <span class="emoji-float inline-block text-4xl">🎈</span>
+                <span class="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Speech Sound Practice</span>
+                <span class="emoji-float inline-block text-4xl">🎈</span>
+            </h1>
+            <p class="text-center text-lg text-gray-600 mt-2">Let's practice speech sounds together!</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-2xl mx-auto px-6 py-8">
+        <!-- Input Section -->
+        <div id="inputSection" class="bg-white rounded-3xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Choose Your Adventure!</h2>
+            
+            <!-- Speech Sound Dropdown -->
+            <div class="mb-6">
+                <label for="speechSound" class="block text-lg font-semibold text-gray-700 mb-2">
+                    Pick a speech sound to practice:
+                </label>
+                <select id="speechSound" class="w-full px-4 py-3 text-lg border-3 border-purple-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-400 focus:border-purple-500 bg-purple-50">
+                    <option value="">Choose a sound...</option>
+                    <option value="S">S - Snake sound 🐍</option>
+                    <option value="T">T - Tap tap sound 🥁</option>
+                    <option value="P">P - Pop sound 🎈</option>
+                    <option value="K">K - Clicking sound 🦗</option>
+                    <option value="W">W - Wind sound 💨</option>
+                </select>
+            </div>
+
+            <!-- Theme Input -->
+            <div class="mb-8">
+                <label for="themeInput" class="block text-lg font-semibold text-gray-700 mb-2">
+                    What's your favorite theme?
+                </label>
+                <input 
+                    type="text" 
+                    id="themeInput" 
+                    maxlength="50" 
+                    placeholder="e.g., animals, space, ocean..." 
+                    class="w-full px-4 py-3 text-lg border-3 border-pink-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-pink-400 focus:border-pink-500 bg-pink-50"
+                />
+                <p class="text-sm text-gray-500 mt-1">
+                    <span id="charCount">0</span>/50 characters
+                </p>
+            </div>
+
+            <!-- Start Button -->
+            <button 
+                id="startButton" 
+                disabled
+                class="w-full py-4 text-xl font-bold text-white bg-gradient-to-r from-blue-500 to-green-500 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+                Start Practice! 🚀
+            </button>
+        </div>
+
+        <!-- Cards Section (Initially Hidden) -->
+        <div id="cardsSection" class="hidden">
+            <!-- Progress Indicator -->
+            <div class="text-center mb-6">
+                <p class="text-xl font-semibold text-gray-700">
+                    Word <span id="currentWord" class="text-purple-600">1</span> of <span class="text-purple-600">10</span>
+                </p>
+            </div>
+
+            <!-- Word Card -->
+            <div class="bg-white rounded-3xl shadow-2xl p-12 mb-8 transform transition-all duration-300" id="wordCard">
+                <h3 class="text-5xl font-bold text-center text-gray-800 mb-4" id="wordDisplay">
+                    <!-- Word will be displayed here -->
+                </h3>
+                <div class="text-center text-6xl mb-6" id="wordEmoji">
+                    <!-- Related emoji will be displayed here -->
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center">
+                <button 
+                    id="prevButton" 
+                    class="px-6 py-3 text-lg font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    disabled
+                >
+                    ← Previous
+                </button>
+
+                <button 
+                    id="newWordsButton" 
+                    class="px-6 py-3 text-lg font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                >
+                    New Words 🎲
+                </button>
+
+                <button 
+                    id="nextButton" 
+                    class="px-6 py-3 text-lg font-bold text-white bg-gradient-to-r from-green-500 to-blue-500 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                    Next →
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script src="index.js"></script>
+</body>
+
+</html>
