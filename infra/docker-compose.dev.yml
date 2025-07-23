@@ -4,6 +4,17 @@ services:
     ports:
       - "${PORT:-8080}:80"
 
+  backend:
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "9229:9229"
+    volumes:
+      - ../src/backend:/app/src/backend:ro
+      - ../tsconfig.json:/app/tsconfig.json:ro
+      - ../infra:/app/infra:ro
+    command: sh -c "npm ci && npx tsx watch --inspect=0.0.0.0:9229 src/backend/server.ts"
+
   livereload:
     image: node:alpine
     stop_grace_period: 1s

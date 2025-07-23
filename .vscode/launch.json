@@ -7,7 +7,18 @@
       "request": "launch",
       "url": "http://localhost:8080",
       "webRoot": "${workspaceFolder}/src",
-      "sourceMaps": true,
+      "sourceMaps": true
+    },
+    {
+      "name": "Debug Backend",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "address": "localhost",
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/app",
+      "skipFiles": ["<node_internals>/**"],
+      "restart": true
     }
   ]
 }

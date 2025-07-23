@@ -17,6 +17,11 @@
 		reverse_proxy livereload:35729
 	}
 	
+	# API proxy to backend
+	handle /api/* {
+		reverse_proxy backend:3000
+	}
+	
 	# Handle everything else with SPA routing
 	handle {
 		try_files {path} {path}/ /index.html

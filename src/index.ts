@@ -56,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
    // Get card navigation elements
    const wordDisplay = document.getElementById("wordDisplay") as HTMLHeadingElement;
    const wordEmoji = document.getElementById("wordEmoji") as HTMLDivElement;
+   const wordImage = document.getElementById("wordImage") as HTMLImageElement;
    const currentWordSpan = document.getElementById("currentWord") as HTMLSpanElement;
    const prevButton = document.getElementById("prevButton") as HTMLButtonElement;
    const nextButton = document.getElementById("nextButton") as HTMLButtonElement;
@@ -80,10 +81,22 @@ document.addEventListener("DOMContentLoaded", () => {
    });
 
    // Initialize words for the selected sound and theme
-   function initializeWords() {
-      currentWords = getThemedWords(selectedSound, selectedTheme);
-      currentIndex = 0;
-      displayCurrentWord();
+   async function initializeWords() {
+      // Show loading state
+      wordDisplay.textContent = "Loading...";
+      wordEmoji.textContent = "⏳";
+      prevButton.disabled = true;
+      nextButton.disabled = true;
+
+      try {
+         currentWords = await getThemedWords(selectedSound, selectedTheme);
+         currentIndex = 0;
+         displayCurrentWord();
+      } catch (error) {
+         console.error("Failed to initialize words:", error);
+         wordDisplay.textContent = "Error loading words";
+         wordEmoji.textContent = "❌";
+      }
    }
 
    // Display the current word
@@ -91,11 +104,41 @@ document.addEventListener("DOMContentLoaded", () => {
       if (currentWords.length === 0) return;
 
       const wordData = currentWords[currentIndex];
+      const isImageWord = (currentIndex + 1) % 3 === 0;
 
       // Update display
       wordDisplay.textContent = wordData.word;
-      wordEmoji.textContent = wordData.emoji;
       currentWordSpan.textContent = (currentIndex + 1).toString();
+
+      // Clear previous image to prevent flicker
+      if (wordImage.src) {
+         wordImage.src = "";
+      }
+
+      // Handle image/emoji display
+      if (isImageWord) {
+         if (wordData.imageUrl) {
+            // Image is ready - preload it first
+            const img = new Image();
+            img.onload = () => {
+               wordImage.src = wordData.imageUrl ?? "";
+               wordImage.classList.remove("hidden");
+               wordEmoji.classList.add("hidden");
+            };
+            img.src = wordData.imageUrl;
+         } else {
+            // Image is still loading
+            wordImage.classList.add("hidden");
+            wordEmoji.textContent = "🔄";
+            wordEmoji.classList.remove("hidden");
+            wordEmoji.classList.add("animate-spin");
+         }
+      } else {
+         // Regular emoji word
+         wordImage.classList.add("hidden");
+         wordEmoji.textContent = wordData.emoji;
+         wordEmoji.classList.remove("hidden", "animate-spin");
+      }
 
       // Update button states
       prevButton.disabled = currentIndex === 0;
@@ -106,8 +149,10 @@ document.addEventListener("DOMContentLoaded", () => {
       void wordCard.offsetWidth; // Force reflow
       wordCard.classList.add("card-entrance");
 
-      // Add floating animation to emoji
-      wordEmoji.classList.add("emoji-float");
+      // Add floating animation to emoji (only if not loading)
+      if (!isImageWord || wordData.imageUrl) {
+         wordEmoji.classList.add("emoji-float");
+      }
 
       // Add special effects for certain words
       addSpecialEffects(wordData);
@@ -251,288 +296,75 @@ document.addEventListener("DOMContentLoaded", () => {
          }
       }, 500);
    });
-});
 
-// Word data structure with themed words for each speech sound
-interface WordData {
-   word: string;
-   emoji: string;
-}
+   // Load image in the background and update the word data when ready
+   async function loadImageInBackground(word: WordData) {
+      try {
+         const response = await fetch("/api/generate-image", {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ word: word.word }),
+         });
 
-interface ThemeWords {
-   [theme: string]: WordData[];
-}
+         if (response.ok) {
+            const data = await response.json();
+            word.imageUrl = data.imageUrl;
 
-interface SoundWords {
-   [sound: string]: ThemeWords;
-}
-
-const wordDatabase: SoundWords = {
-   S: {
-      animals: [
-         { word: "snake", emoji: "🐍" },
-         { word: "seal", emoji: "🦭" },
-         { word: "swan", emoji: "🦢" },
-         { word: "snail", emoji: "🐌" },
-         { word: "squirrel", emoji: "🐿️" },
-         { word: "seahorse", emoji: "🐴" },
-         { word: "starfish", emoji: "⭐" },
-         { word: "salamander", emoji: "🦎" },
-         { word: "sparrow", emoji: "🐦" },
-         { word: "stingray", emoji: "🐋" },
-      ],
-      space: [
-         { word: "star", emoji: "⭐" },
-         { word: "sun", emoji: "☀️" },
-         { word: "saturn", emoji: "🪐" },
-         { word: "satellite", emoji: "🛰️" },
-         { word: "spaceship", emoji: "🚀" },
-         { word: "astronaut", emoji: "👨‍🚀" },
-         { word: "cosmos", emoji: "✨" },
-         { word: "solar", emoji: "☀️" },
-         { word: "space", emoji: "🌌" },
-         { word: "shooting star", emoji: "💫" },
-      ],
-      ocean: [
-         { word: "sea", emoji: "🌊" },
-         { word: "sand", emoji: "🏖️" },
-         { word: "seashell", emoji: "🐚" },
-         { word: "surf", emoji: "🏄" },
-         { word: "sailboat", emoji: "⛵" },
-         { word: "sunshine", emoji: "☀️" },
-         { word: "seaweed", emoji: "🌿" },
-         { word: "sandcastle", emoji: "🏰" },
-         { word: "seaside", emoji: "🏖️" },
-         { word: "sunset", emoji: "🌅" },
-      ],
-      default: [
-         { word: "smile", emoji: "😊" },
-         { word: "song", emoji: "🎵" },
-         { word: "sweet", emoji: "🍬" },
-         { word: "super", emoji: "⭐" },
-         { word: "sock", emoji: "🧦" },
-         { word: "seven", emoji: "7️⃣" },
-         { word: "six", emoji: "6️⃣" },
-         { word: "silly", emoji: "🤪" },
-         { word: "special", emoji: "✨" },
-         { word: "surprise", emoji: "🎁" },
-      ],
-   },
-   T: {
-      animals: [
-         { word: "tiger", emoji: "🐅" },
-         { word: "turtle", emoji: "🐢" },
-         { word: "turkey", emoji: "🦃" },
-         { word: "toad", emoji: "🐸" },
-         { word: "toucan", emoji: "🦜" },
-         { word: "trout", emoji: "🐟" },
-         { word: "tarantula", emoji: "🕷️" },
-         { word: "termite", emoji: "🐜" },
-         { word: "tadpole", emoji: "🐸" },
-         { word: "tuna", emoji: "🐟" },
-      ],
-      space: [
-         { word: "telescope", emoji: "🔭" },
-         { word: "twinkle", emoji: "✨" },
-         { word: "trajectory", emoji: "🚀" },
-         { word: "titan", emoji: "🌙" },
-         { word: "twilight", emoji: "🌆" },
-         { word: "terrestrial", emoji: "🌍" },
-         { word: "thrust", emoji: "🚀" },
-         { word: "time", emoji: "⏰" },
-         { word: "travel", emoji: "✈️" },
-         { word: "technology", emoji: "💻" },
-      ],
-      ocean: [
-         { word: "tide", emoji: "🌊" },
-         { word: "treasure", emoji: "💎" },
-         { word: "tropical", emoji: "🏝️" },
-         { word: "tuna", emoji: "🐟" },
-         { word: "tentacle", emoji: "🐙" },
-         { word: "tsunami", emoji: "🌊" },
-         { word: "temperature", emoji: "🌡️" },
-         { word: "turquoise", emoji: "💙" },
-         { word: "trawler", emoji: "🚢" },
-         { word: "triton", emoji: "🔱" },
-      ],
-      default: [
-         { word: "toy", emoji: "🧸" },
-         { word: "tree", emoji: "🌳" },
-         { word: "train", emoji: "🚂" },
-         { word: "treat", emoji: "🍭" },
-         { word: "two", emoji: "2️⃣" },
-         { word: "ten", emoji: "🔟" },
-         { word: "tall", emoji: "📏" },
-         { word: "tiny", emoji: "🐜" },
-         { word: "tasty", emoji: "😋" },
-         { word: "tickle", emoji: "🤭" },
-      ],
-   },
-   P: {
-      animals: [
-         { word: "panda", emoji: "🐼" },
-         { word: "penguin", emoji: "🐧" },
-         { word: "pig", emoji: "🐷" },
-         { word: "parrot", emoji: "🦜" },
-         { word: "puppy", emoji: "🐶" },
-         { word: "peacock", emoji: "🦚" },
-         { word: "pony", emoji: "🐴" },
-         { word: "polar bear", emoji: "🐻‍❄️" },
-         { word: "pelican", emoji: "🦢" },
-         { word: "porcupine", emoji: "🦔" },
-      ],
-      space: [
-         { word: "planet", emoji: "🪐" },
-         { word: "pluto", emoji: "❄️" },
-         { word: "probe", emoji: "🛸" },
-         { word: "pulsar", emoji: "⭐" },
-         { word: "phase", emoji: "🌙" },
-         { word: "payload", emoji: "📦" },
-         { word: "pilot", emoji: "👨‍✈️" },
-         { word: "propulsion", emoji: "🚀" },
-         { word: "particle", emoji: "✨" },
-         { word: "portal", emoji: "🌀" },
-      ],
-      ocean: [
-         { word: "pearl", emoji: "🦪" },
-         { word: "port", emoji: "⚓" },
-         { word: "plankton", emoji: "🦠" },
-         { word: "pier", emoji: "🌉" },
-         { word: "paddle", emoji: "🚣" },
-         { word: "pool", emoji: "🏊" },
-         { word: "pacific", emoji: "🌊" },
-         { word: "pebble", emoji: "🪨" },
-         { word: "pelican", emoji: "🦢" },
-         { word: "paradise", emoji: "🏝️" },
-      ],
-      default: [
-         { word: "play", emoji: "🎮" },
-         { word: "party", emoji: "🎉" },
-         { word: "pizza", emoji: "🍕" },
-         { word: "purple", emoji: "💜" },
-         { word: "pink", emoji: "💗" },
-         { word: "present", emoji: "🎁" },
-         { word: "piano", emoji: "🎹" },
-         { word: "park", emoji: "🏞️" },
-         { word: "pencil", emoji: "✏️" },
-         { word: "popcorn", emoji: "🍿" },
-      ],
-   },
-   K: {
-      animals: [
-         { word: "kangaroo", emoji: "🦘" },
-         { word: "koala", emoji: "🐨" },
-         { word: "kitten", emoji: "🐱" },
-         { word: "kingfisher", emoji: "🐦" },
-         { word: "kookaburra", emoji: "🦅" },
-         { word: "krill", emoji: "🦐" },
-         { word: "komodo", emoji: "🦎" },
-         { word: "kudu", emoji: "🦌" },
-         { word: "kiwi", emoji: "🥝" },
-         { word: "catfish", emoji: "🐟" },
-      ],
-      space: [
-         { word: "comet", emoji: "☄️" },
-         { word: "cosmos", emoji: "🌌" },
-         { word: "crater", emoji: "🌑" },
-         { word: "capsule", emoji: "🛸" },
-         { word: "cosmic", emoji: "✨" },
-         { word: "coordinate", emoji: "📍" },
-         { word: "kepler", emoji: "🔭" },
-         { word: "kinetic", emoji: "⚡" },
-         { word: "kilometer", emoji: "📏" },
-         { word: "craft", emoji: "🚀" },
-      ],
-      ocean: [
-         { word: "coral", emoji: "🪸" },
-         { word: "kelp", emoji: "🌿" },
-         { word: "kayak", emoji: "🛶" },
-         { word: "creek", emoji: "🏞️" },
-         { word: "coast", emoji: "🏖️" },
-         { word: "current", emoji: "🌊" },
-         { word: "clam", emoji: "🦪" },
-         { word: "crab", emoji: "🦀" },
-         { word: "kite", emoji: "🪁" },
-         { word: "catch", emoji: "🎣" },
-      ],
-      default: [
-         { word: "key", emoji: "🔑" },
-         { word: "kite", emoji: "🪁" },
-         { word: "king", emoji: "👑" },
-         { word: "kind", emoji: "💝" },
-         { word: "kitchen", emoji: "🍳" },
-         { word: "kid", emoji: "👦" },
-         { word: "kick", emoji: "⚽" },
-         { word: "cookie", emoji: "🍪" },
-         { word: "cake", emoji: "🎂" },
-         { word: "color", emoji: "🎨" },
-      ],
-   },
-   W: {
-      animals: [
-         { word: "whale", emoji: "🐋" },
-         { word: "wolf", emoji: "🐺" },
-         { word: "walrus", emoji: "🦭" },
-         { word: "worm", emoji: "🪱" },
-         { word: "woodpecker", emoji: "🦅" },
-         { word: "wasp", emoji: "🐝" },
-         { word: "wombat", emoji: "🐨" },
-         { word: "wildebeest", emoji: "🦬" },
-         { word: "wallaby", emoji: "🦘" },
-         { word: "weasel", emoji: "🦫" },
-      ],
-      space: [
-         { word: "wormhole", emoji: "🌀" },
-         { word: "warp", emoji: "💫" },
-         { word: "wavelength", emoji: "〰️" },
-         { word: "weightless", emoji: "🪶" },
-         { word: "window", emoji: "🪟" },
-         { word: "world", emoji: "🌍" },
-         { word: "wing", emoji: "🪽" },
-         { word: "wander", emoji: "🚶" },
-         { word: "wonder", emoji: "✨" },
-         { word: "watch", emoji: "⌚" },
-      ],
-      ocean: [
-         { word: "wave", emoji: "🌊" },
-         { word: "water", emoji: "💧" },
-         { word: "whirlpool", emoji: "🌀" },
-         { word: "wet", emoji: "💦" },
-         { word: "wind", emoji: "💨" },
-         { word: "waterfall", emoji: "💧" },
-         { word: "warm", emoji: "🌡️" },
-         { word: "wildlife", emoji: "🐠" },
-         { word: "wade", emoji: "🚶" },
-         { word: "wash", emoji: "🌊" },
-      ],
-      default: [
-         { word: "wish", emoji: "⭐" },
-         { word: "win", emoji: "🏆" },
-         { word: "wonder", emoji: "💫" },
-         { word: "walk", emoji: "🚶" },
-         { word: "wait", emoji: "⏰" },
-         { word: "want", emoji: "🤲" },
-         { word: "wow", emoji: "😮" },
-         { word: "warm", emoji: "🌡️" },
-         { word: "wave", emoji: "👋" },
-         { word: "welcome", emoji: "🤗" },
-      ],
-   },
-};
-
-// Function to get words based on sound and theme
-function getThemedWords(sound: string, theme: string): WordData[] {
-   const soundWords = wordDatabase[sound];
-   if (!soundWords) return [];
-
-   // Try to find exact theme match (case-insensitive)
-   const themeLower = theme.toLowerCase();
-   for (const [key, words] of Object.entries(soundWords)) {
-      if (key.toLowerCase() === themeLower || themeLower.includes(key)) {
-         return words;
+            // If this word is currently displayed, update the view
+            if (currentWords[currentIndex] === word) {
+               displayCurrentWord();
+            }
+         }
+      } catch (error) {
+         console.error(`Failed to generate image for ${word.word}:`, error);
       }
    }
 
-   // If no match, return default words
-   return soundWords.default || [];
-}
+   // Word data structure with themed words for each speech sound
+   interface WordData {
+      word: string;
+      emoji: string;
+      imageUrl?: string;
+   }
+
+   // Function to get words from API based on sound and theme
+   async function getThemedWords(sound: string, theme: string): Promise<WordData[]> {
+      try {
+         const response = await fetch("/api/generate-words", {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+               sound,
+               theme,
+               count: 10,
+            }),
+         });
+
+         if (!response.ok) {
+            throw new Error("Failed to generate words");
+         }
+
+         const data = await response.json();
+         const words: WordData[] = data.words;
+
+         // Load images in the background for every 3rd word
+         words.forEach((word, index) => {
+            if ((index + 1) % 3 === 0) {
+               loadImageInBackground(word);
+            }
+         });
+
+         return words;
+      } catch (error) {
+         console.error("Error fetching words:", error);
+         // Fallback to default words if API fails
+         alert("Failed to fetch words, something's wrong with the server, Boo!");
+         location.reload();
+         return [];
+      }
+   }
+});

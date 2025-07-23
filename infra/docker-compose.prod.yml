@@ -2,10 +2,15 @@
 services:
   web:
     labels:
-      caddy: static files only by the 2. test.mariozechner.at
+      caddy: test.mariozechner.at
       caddy.reverse_proxy: "{{upstreams 80}}"
     networks:
+      - default
       - caddy-network
+
+  backend:
+    networks:
+      - default
 
 networks:
   caddy-network:

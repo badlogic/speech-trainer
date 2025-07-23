@@ -1,15 +1,18 @@
 # Project: Speech Trainer
 
-A web-based speech training application (currently in MVP development stage) built with modern web technologies and containerized deployment.
+An interactive word practice application for children learning speech sounds, featuring AI-powered content generation through OpenAI integration.
 
 ## Features
-- Currently a starter template ready for speech training features
+- Interactive speech sound practice with 5 target sounds (S, T, P, K, W)
+- AI-generated themed words using OpenAI GPT-4
+- AI-generated images for every 3rd word using DALL-E
+- Card-based navigation with keyboard support
 - Live reload development environment
 - Automatic SSL with production deployment
-- Intended features: speech recognition, practice exercises, progress tracking, pronunciation feedback
 
 ## Tech Stack
 - TypeScript for type-safe development
+- Express.js backend with OpenAI SDK integration
 - Tailwind CSS v4 for styling
 - Caddy web server with automatic HTTPS
 - Docker & Docker Compose for containerization
@@ -18,16 +21,18 @@ A web-based speech training application (currently in MVP development stage) bui
 - Live reload via WebSocket proxy
 
 ## Structure
-- `src/` - Source files (HTML, TypeScript, CSS)
+- `src/` - Frontend source files (HTML, TypeScript, CSS)
+- `src/backend/` - Backend Express server
 - `dist/` - Build output (git ignored)
 - `infra/` - Infrastructure and build configuration
 - `todos/` - Project planning and task management
-- Entry points: `src/index.html`, `src/index.ts`, `run.sh`
+- Entry points: `src/index.html`, `src/index.ts`, `src/backend/server.ts`, `run.sh`
 
 ## Architecture
-- Static site architecture with client-side TypeScript
+- Frontend: Single-page application with vanilla TypeScript
+- Backend: Express.js API server for OpenAI integration
 - Docker-based development and production environments
-- Caddy handles routing and SSL
+- Caddy handles routing, SSL, and API proxying
 - Custom build pipeline using Node.js scripts
 - WebSocket-based live reload for development
 

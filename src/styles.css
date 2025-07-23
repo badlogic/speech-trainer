@@ -70,11 +70,6 @@ button:focus {
    }
 }
 
-/* Card transitions */
-.card-transition {
-   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 /* Smooth transitions for word card */
 #wordCard {
    transition:
@@ -130,20 +125,9 @@ button:focus {
    background: linear-gradient(180deg, #9333ea 0%, #db2777 100%);
 }
 
-/* Loading spinner for future use */
-.spinner {
-   border: 4px solid rgba(168, 85, 247, 0.3);
-   border-top-color: #a855f7;
-   border-radius: 50%;
-   width: 40px;
-   height: 40px;
+/* Animate spin utility */
+.animate-spin {
    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-   to {
-      transform: rotate(360deg);
-   }
 }
 
 /* Accessibility improvements */

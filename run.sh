@@ -24,6 +24,8 @@ sync_files() {
       --include="dist/***" \
       --include="infra/***" \
       --include="run.sh" \
+      --include="package.json" \
+      --include="package-lock.json" \
       --exclude="*" \
       --delete \
       ./ $SERVER:$SERVER_DIR/$DOMAIN/
@@ -35,8 +37,12 @@ case "$1" in
 dev)
     echo "Starting development server..."
     npm install
-    infra/build.js
-    infra/build.js --watch &
+    node infra/build.js
+
+    # Generate .env file from env.vars
+    node infra/generate-env.js > .env
+
+    node infra/build.js --watch &
     docker compose -p $PROJECT -f infra/docker-compose.yml -f infra/docker-compose.dev.yml up --build --menu=false
     ;;
 prod)
@@ -55,11 +61,18 @@ logs)
 deploy)
     echo "Deploying $PROJECT to $DOMAIN..."
     npm install
-    infra/build.js
+    node infra/build.js
     sync_files
 
     echo "Restarting services..."
-    ssh $SERVER "cd $SERVER_DIR/$DOMAIN && ./run.sh stop && ./run.sh prod"
+    # Generate .env file from env.vars
+    ENV_CONTENT=$(node infra/generate-env.js)
+
+    # Deploy with generated .env file
+    ssh $SERVER "cd $SERVER_DIR/$DOMAIN && cat > .env << 'EOF'
+$ENV_CONTENT
+EOF
+    ./run.sh stop && ./run.sh prod"
 
     echo "✅ Deployed to https://$DOMAIN"
     ;;
@@ -68,15 +81,27 @@ sync)
     sync_files
     echo "✅ Synced to $DOMAIN"
     ;;
+build)
+    echo "Building project..."
+    npm install
+    node infra/build.js
+    echo "✅ Built to dist/"
+    ;;
+logs-remote)
+    echo "Showing remote logs from $DOMAIN (Ctrl+C to exit)..."
+    ssh $SERVER "cd $SERVER_DIR/$DOMAIN && ./run.sh logs"
+    ;;
 *)
-    echo "Usage: $0 {dev|prod|stop|logs|deploy|sync}"
+    echo "Usage: $0 {dev|prod|stop|logs|build|deploy|sync|logs-remote}"
     echo ""
-    echo "  dev     - Start development server (foreground)"
-    echo "  prod    - Start production server (background)"
-    echo "  stop    - Stop all services"
-    echo "  logs    - Show logs"
-    echo "  deploy  - Deploy and restart services"
-    echo "  sync    - Sync files only, no restart"
+    echo "  dev         - Start development server (foreground)"
+    echo "  prod        - Start production server (background)"
+    echo "  stop        - Stop all services"
+    echo "  logs        - Show local logs"
+    echo "  build       - Build project to dist/"
+    echo "  deploy      - Deploy and restart services"
+    echo "  sync        - Sync files only, no restart"
+    echo "  logs-remote - Show logs from remote server"
     exit 1
     ;;
 esac
