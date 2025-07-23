@@ -2,7 +2,7 @@
 services:
   web:
     labels:
-      caddy: test.mariozechner.at
+      caddy: speechtrainer.mariozechner.at
       caddy.reverse_proxy: "{{upstreams 80}}"
     networks:
       - default

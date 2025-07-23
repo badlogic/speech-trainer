@@ -60,13 +60,13 @@ speech-trainer/
 ./run.sh dev              # Start dev server at localhost:8080
 PORT=8081 ./run.sh dev    # Start on custom port
 ./run.sh prod             # Run production locally
-./run.sh deploy           # Deploy to static files only by the 2. test.mariozechner.at
-./run.sh sync             # Sync files (dist/, infra/) to static files only by the 2. test.mariozechner.at
+./run.sh deploy           # Deploy to server
+./run.sh sync             # Sync files (dist/, infra/)
 ./run.sh stop             # Stop containers locally
 ./run.sh logs             # View container logs locally
 ```
 
-Deploys to `/home/badlogic/static files only by the 2. test.mariozechner.at/` on `slayer.marioslab.io`. Caddy automatically routes `static files only by the 2. test.mariozechner.at` traffic to this container with SSL.
+Deploys to `/home/badlogic/` on `slayer.marioslab.io`. Caddy automatically routes `test.mariozechner.at` traffic to this container with SSL.
 
 ## Tech Stack
 

@@ -7,7 +7,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT=speech-trainer
 SERVER=slayer.marioslab.io
 SERVER_DIR=/home/badlogic
-DOMAIN=test.mariozechner.at
+DOMAIN=speechtrainer.mariozechner.at
 
 # Use different project name if PORT is set to allow multiple instances
 if [ -n "$PORT" ]; then
