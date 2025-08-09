@@ -58,6 +58,10 @@ logs)
     docker compose -p $PROJECT -f infra/docker-compose.yml -f infra/docker-compose.dev.yml logs -f 2>/dev/null || \
     docker compose -p $PROJECT -f infra/docker-compose.yml -f infra/docker-compose.prod.yml logs -f
     ;;
+logs-remote)
+    echo "Showing remote logs from $DOMAIN (Ctrl+C to exit)..."
+    ssh $SERVER "cd $SERVER_DIR/$DOMAIN && ./run.sh logs"
+    ;;
 deploy)
     echo "Deploying $PROJECT to $DOMAIN..."
     npm install
@@ -87,10 +91,6 @@ build)
     node infra/build.js
     echo "✅ Built to dist/"
     ;;
-logs-remote)
-    echo "Showing remote logs from $DOMAIN (Ctrl+C to exit)..."
-    ssh $SERVER "cd $SERVER_DIR/$DOMAIN && ./run.sh logs"
-    ;;
 *)
     echo "Usage: $0 {dev|prod|stop|logs|build|deploy|sync|logs-remote}"
     echo ""
@@ -98,10 +98,10 @@ logs-remote)
     echo "  prod        - Start production server (background)"
     echo "  stop        - Stop all services"
     echo "  logs        - Show local logs"
+    echo "  logs-remote - Show logs from remote server"
     echo "  build       - Build project to dist/"
     echo "  deploy      - Deploy and restart services"
     echo "  sync        - Sync files only, no restart"
-    echo "  logs-remote - Show logs from remote server"
     exit 1
     ;;
 esac
